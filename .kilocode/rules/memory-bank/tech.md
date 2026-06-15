@@ -8,21 +8,22 @@
 | React        | 19.x    | UI library                      |
 | TypeScript   | 5.9.x   | Type-safe JavaScript            |
 | Tailwind CSS | 4.x     | Utility-first CSS               |
-| Bun          | Latest  | Package manager & runtime       |
+| Bun          | 1.3.12  | Package manager & runtime       |
 
 ## Development Environment
 
 ### Prerequisites
 
-- Bun installed (`curl -fsSL https://bun.sh/install | bash`)
-- Node.js 20+ (for compatibility)
+- Bun 1.3.12+ installed (`curl -fsSL https://bun.sh/install | bash`)
+- Node.js 22+ for compatibility
+- Optional: Docker for containerized build/run
 
 ### Commands
 
 ```bash
 bun install        # Install dependencies
 bun dev            # Start dev server (http://localhost:3000)
-bun build          # Production build
+bun run build      # Production build
 bun start          # Start production server
 bun lint           # Run ESLint
 bun typecheck      # Run TypeScript type checking
@@ -33,13 +34,14 @@ bun typecheck      # Run TypeScript type checking
 ### Next.js Config (`next.config.ts`)
 
 - App Router enabled
-- Default settings for flexibility
+- Standalone output for portable production/container builds
 
 ### TypeScript Config (`tsconfig.json`)
 
 - Strict mode enabled
 - Path alias: `@/*` → `src/*`
 - Target: ESNext
+- React automatic runtime
 
 ### Tailwind CSS 4 (`postcss.config.mjs`)
 
@@ -57,9 +59,9 @@ bun typecheck      # Run TypeScript type checking
 
 ```json
 {
-  "next": "^16.1.3", // Framework
-  "react": "^19.2.3", // UI library
-  "react-dom": "^19.2.3" // React DOM
+  "next": "^16.1.3",
+  "react": "^19.2.3",
+  "react-dom": "^19.2.3"
 }
 ```
 
@@ -83,6 +85,12 @@ bun typecheck      # Run TypeScript type checking
 ```
 /
 ├── .gitignore              # Git ignore rules
+├── .env.example            # Local environment template
+├── .node-version           # Node.js runtime pin
+├── .bun-version            # Bun runtime pin
+├── bunfig.toml             # Bun install configuration
+├── Dockerfile              # Containerized build/run setup
+├── .dockerignore           # Docker build ignore rules
 ├── package.json            # Dependencies and scripts
 ├── bun.lock                # Bun lockfile
 ├── next.config.ts          # Next.js configuration
@@ -94,8 +102,8 @@ bun typecheck      # Run TypeScript type checking
 └── src/                    # Source code
     └── app/                # Next.js App Router
         ├── layout.tsx      # Root layout
-        ├── page.tsx        # Home page
-        ├── globals.css     # Global styles
+        ├── page.tsx        # Mobile-first home page
+        ├── globals.css     # Global mobile-first styles
         └── favicon.ico     # Site icon
 ```
 
@@ -133,11 +141,11 @@ bun typecheck      # Run TypeScript type checking
 
 ### Build Output
 
-- Server-rendered pages by default
-- Can be configured for static export
+- Static page by default
+- Standalone output enabled for portable production builds
 
 ### Environment Variables
 
-- None required for base template
-- Add as needed for features
+- `.env.example` documents optional local values
 - Use `.env.local` for local development
+- `NEXT_PUBLIC_*` values are safe for client-side exposure

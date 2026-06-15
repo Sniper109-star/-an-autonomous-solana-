@@ -2,9 +2,9 @@
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**Template Status**: ✅ Mobile-first starter ready for development
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+The template is a Next.js 16 starter with TypeScript, Tailwind CSS 4, Bun, and a polished mobile-first landing page. Dependency and environment setup files are included for repeatable local and containerized setup.
 
 ## Recently Completed
 
@@ -14,23 +14,29 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
+- [x] Mobile-first landing page UI/UX with responsive cards, sticky actions, and touch-friendly controls
+- [x] Portable setup files for Bun, Node, Docker, and environment variables
 
 ## Current Structure
 
 | File/Directory | Purpose | Status |
 |----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
-| `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/globals.css` | Global styles | ✅ Ready |
+| `src/app/page.tsx` | Mobile-first home page | ✅ Ready |
+| `src/app/layout.tsx` | Root layout with mobile viewport metadata | ✅ Ready |
+| `src/app/globals.css` | Global mobile-first styling | ✅ Ready |
+| `.env.example` | Local environment template | ✅ Ready |
+| `.node-version` | Node runtime pin | ✅ Ready |
+| `.bun-version` | Bun runtime pin | ✅ Ready |
+| `Dockerfile` | Containerized build/run setup | ✅ Ready |
 | `.kilocode/` | AI context & recipes | ✅ Ready |
 
 ## Current Focus
 
-The template is ready. Next steps depend on user requirements:
+The starter is ready as a polished mobile-first foundation. Next steps depend on user requirements:
 
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
+1. Add application-specific pages and flows
+2. Add components for the target product
+3. Add persistent data, auth, or API routes when needed
 
 ## Quick Start Guide
 
@@ -85,3 +91,4 @@ export async function GET() {
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
+| 2026-06-15 | Upgraded UI/UX to mobile-first experience; added portable Bun, Node, environment, and Docker setup files |

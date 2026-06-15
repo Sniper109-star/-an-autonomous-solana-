@@ -1,0 +1,12 @@
+.git
+.gitignore
+.next
+out
+node_modules
+coverage
+.env
+.env.*
+!.env.example
+*.log
+*.pem
+.DS_Store
