@@ -12,7 +12,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bot": "tsx src/bots/solana-monitor.ts",
+    "bot:health": "tsx src/bots/health.ts",
+    "bot:validate-env": "tsx src/bots/validate-env.ts"
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.4",

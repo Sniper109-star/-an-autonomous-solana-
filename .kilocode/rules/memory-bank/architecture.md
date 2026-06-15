@@ -1,120 +1,123 @@
-# System Patterns: Next.js Starter Template
+# System Patterns: Solana Monitoring Backend
 
 ## Architecture Overview
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx          # Root layout + metadata
-│   ├── page.tsx            # Home page
-│   ├── globals.css         # Tailwind imports + global styles
-│   └── favicon.ico         # Site icon
-└── (expand as needed)
-    ├── components/         # React components (add when needed)
-    ├── lib/                # Utilities and helpers (add when needed)
-    └── db/                 # Database files (add via recipe)
+├── app/                         # Next.js App Router
+│   ├── api/
+│   │   └── monitoring/          # Backend API routes
+│   ├── layout.tsx               # Root layout + metadata
+│   ├── page.tsx                 # Mobile-first home page
+│   ├── globals.css              # Tailwind imports + global styles
+│   └── favicon.ico              # Site icon
+├── bots/                        # Standalone bot scripts
+│   ├── health.ts                # Non-blocking health check
+│   ├── solana-monitor.ts        # Long-running monitor
+│   └── validate-env.ts          # Environment validation
+└── lib/
+    ├── api-auth.ts              # Optional API token guard
+    ├── env.ts                   # Environment parsing
+    └── solana/                  # Solana monitoring backend
+        ├── constants.ts         # Solana program addresses
+        ├── helius-grpc.ts       # Yellowstone gRPC stream manager
+        ├── index.ts             # Monitoring backend orchestration
+        ├── jito.ts              # Jito block-engine wrapper
+        ├── parser.ts            # gRPC event parser
+        ├── risk.ts              # Rug-risk scoring
+        ├── store.ts             # In-memory event store
+        └── types.ts             # Shared types
 ```
 
 ## Key Design Patterns
 
-### 1. App Router Pattern
+### 1. App Router API Pattern
 
-Uses Next.js App Router with file-based routing:
-```
-src/app/
-├── page.tsx           # Route: /
-├── about/page.tsx     # Route: /about
-├── blog/
-│   ├── page.tsx       # Route: /blog
-│   └── [slug]/page.tsx # Route: /blog/:slug
-└── api/
-    └── route.ts       # API Route: /api
+Backend endpoints live under `src/app/api/monitoring`:
+
+```txt
+/api/monitoring           # Start/stop/status
+/api/monitoring/health    # Health
+/api/monitoring/wallets   # Watched wallets
+/api/monitoring/config    # Runtime config
 ```
 
-### 2. Component Organization Pattern (When Expanding)
+Server routes use `NextResponse.json` and `dynamic = "force-dynamic"` where real-time state is returned.
 
-```
-src/components/
-├── ui/                # Reusable UI components (Button, Card, etc.)
-├── layout/            # Layout components (Header, Footer)
-├── sections/          # Page sections (Hero, Features, etc.)
-└── forms/             # Form components
-```
+### 2. Backend Orchestration Pattern
 
-### 3. Server Components by Default
+`src/lib/solana/index.ts` owns the singleton `monitoringBackend`, which coordinates:
 
-All components are Server Components unless marked with `"use client"`:
-```tsx
-// Server Component (default) - can fetch data, access DB
-export default function Page() {
-  return <div>Server rendered</div>;
-}
+1. Environment loading
+2. Helius gRPC stream lifecycle
+3. Jito health checks
+4. In-memory event indexing
+5. Runtime configuration updates
 
-// Client Component - for interactivity
-"use client";
-export default function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
-}
-```
+### 3. Streaming Pattern
 
-### 4. Layout Pattern
+`src/lib/solana/helius-grpc.ts` wraps the Yellowstone gRPC client and exposes:
 
-Layouts wrap pages and can be nested:
-```tsx
-// src/app/layout.tsx - Root layout
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
+- `connect()`
+- `disconnect()`
+- `health()`
+- Transaction and account update handling
 
-// src/app/dashboard/layout.tsx - Nested layout
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex">
-      <Sidebar />
-      <main>{children}</main>
-    </div>
-  );
-}
-```
+The stream uses reconnect options and keepalive pings.
+
+### 4. Event Parsing Pattern
+
+`src/lib/solana/parser.ts` converts raw Yellowstone gRPC objects into normalized `SolanaTransactionEvent` records with:
+
+- Signature
+- Slot
+- Status
+- Accounts
+- Program IDs
+- Token transfers
+- Logs
+- Risk score and reasons
+
+### 5. Risk Scoring Pattern
+
+`src/lib/solana/risk.ts` keeps risk logic transparent and adjustable. Each signal contributes points, then the final score maps to `low`, `medium`, `high`, or `critical`.
+
+### 6. Server Components by Default
+
+All React components are Server Components unless marked with `"use client"`. Bot and backend logic remains outside React client components.
 
 ## Styling Conventions
 
 ### Tailwind CSS Usage
+
 - Utility classes directly on elements
 - Component composition for repeated patterns
 - Responsive: `sm:`, `md:`, `lg:`, `xl:`
-
-### Common Patterns
-```tsx
-// Container
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-// Responsive grid
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-// Flexbox centering
-<div className="flex items-center justify-center">
-```
+- Mobile-first spacing and touch targets
 
 ## File Naming Conventions
 
-- Components: PascalCase (`Button.tsx`, `Header.tsx`)
-- Utilities: camelCase (`utils.ts`, `helpers.ts`)
-- Pages/Routes: lowercase (`page.tsx`, `layout.tsx`)
-- Directories: kebab-case (`api-routes/`) or lowercase (`components/`)
+- Components: PascalCase
+- Utilities: camelCase
+- Pages/Routes: lowercase
+- Backend modules: domain-based under `src/lib/solana`
 
 ## State Management
 
-For simple needs:
-- `useState` for local component state
-- `useContext` for shared state
-- Server Components for data fetching
+### Frontend
 
-For complex needs (add when necessary):
-- Zustand for client state
-- React Query for server state
+- Static content by default
+- Add client state only when interactive UI is required
+
+### Backend
+
+- In-memory event store for portability
+- Add persistent storage when replay or durability is required
+
+## Security Patterns
+
+- Optional `BOT_API_TOKEN` guard for POST routes
+- Environment variables for secrets
+- No private keys committed
+- Jito auth keypair loaded only from local file path
+- Helius API key never exposed to client
